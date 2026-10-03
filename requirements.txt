@@ -1,0 +1,4 @@
+pymongo>=4.6,<5
+pydantic>=2.5,<3
+ollama>=0.4,<1
+reportlab>=4,<5

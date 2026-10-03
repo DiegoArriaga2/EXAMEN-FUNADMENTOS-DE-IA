@@ -1,0 +1,31 @@
+id,asunto,correo,categoria_real
+1,Alerta de derrame,Se detectó fuga de químico inflamable en andén 3,materiales_peligrosos
+2,Exceso de peso,La báscula reporta sobrepeso para CAM-102,sobrepeso
+3,Acceso denegado,Intento de ingreso sin autorización en caseta norte,acceso_no_autorizado
+4,Lector RFID,El lector RFID no enciende,falla_hardware
+5,Sistema lento,La aplicación está lenta y no carga,falla_software
+6,Conductor cansado,El chofer reporta fatiga y sueño,somnolencia_conductor
+7,Incendio en patio,Emergencia por incendio junto al área de carga,materiales_peligrosos
+8,Producto corrosivo,Contenedor corrosivo presenta fuga,materiales_peligrosos
+9,Báscula alterada,El peso excede el límite permitido,sobrepeso
+10,Placa no autorizada,La barrera detectó vehículo intruso,acceso_no_autorizado
+11,Cámara apagada,La cámara de acceso está apagada,falla_hardware
+12,Pantalla con error,El sistema muestra error al registrar,falla_software
+13,Somnolencia,Operador observa al conductor dormido,somnolencia_conductor
+14,Material tóxico,Posible derrame de sustancia tóxica,materiales_peligrosos
+15,Sobrecarga,Se excede la capacidad de la unidad,sobrepeso
+16,Sin permiso,El camión llega sin autorización previa,acceso_no_autorizado
+17,Sensor dañado,Sensor de peso dañado,falla_hardware
+18,Aplicación caída,El software está caído desde esta mañana,falla_software
+19,Accidente,Conductor con cansancio casi provoca accidente,somnolencia_conductor
+20,Químico inflamable,Carga inflamable requiere atención inmediata,materiales_peligrosos
+21,Peso alto,La báscula marcó 48 toneladas,sobrepeso
+22,Intruso,Acceso no autorizado detectado por barrera,acceso_no_autorizado
+23,Falla eléctrica,Lector apagado por falla eléctrica,falla_hardware
+24,Pantalla lenta,La pantalla del sistema va muy lento,falla_software
+25,Chofer fatigado,El conductor presenta fatiga,somnolencia_conductor
+26,Derrame urgente,Fuga de químico corrosivo en muelle 2,materiales_peligrosos
+27,Sobrepeso urgente,La unidad excede el límite de báscula,sobrepeso
+28,Acceso denegado,Intento no autorizado en puerta B,acceso_no_autorizado
+29,RFID no funciona,El lector no enciende en caseta,falla_hardware
+30,Error de aplicación,La aplicación no carga y muestra error,falla_software

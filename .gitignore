@@ -1,0 +1,7 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+resultados_experimento.json
+reporte_*.pdf
+reporte_*.csv
