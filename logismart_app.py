@@ -16,7 +16,9 @@ import threading
 import time
 import tkinter as tk
 from datetime import datetime, timedelta, timezone
-from tkinter import messagebox, ttk, filedialog
+from tkinter import messagebox, filedialog
+import ttkbootstrap as ttkb
+ttk = ttkb
 from typing import Optional, Literal
 from logismart.domain import evaluate, truth_rows, rule_classifier, extract_entities, llm_classify, fuse
 from logismart.repository import MongoStore as Store
@@ -55,6 +57,18 @@ KEYWORDS = {
 }
 BASE_PRIORITY = {"materiales_peligrosos": "critica", "somnolencia_conductor": "alta", "acceso_no_autorizado": "alta", "sobrepeso": "media", "falla_hardware": "media", "falla_software": "baja", "otro": "baja"}
 URGENT = ["urgente", "emergencia", "accidente", "incendio", "herido", "critico", "inmediato"]
+NEON = {
+    "bg": "#080B16", "surface": "#101729", "surface_2": "#151F35",
+    "cyan": "#00E5FF", "pink": "#FF3CAC", "lime": "#C8FF3D",
+    "violet": "#9B7BFF", "text": "#EAF4FF", "muted": "#A3B2C9",
+    "border": "#293955", "selected": "#20384D", "input": "#0B1120",
+}
+ttkb.Theme(
+    name="logismart-neon", primary=NEON["cyan"], success=NEON["lime"],
+    info="#49A8FF", warning=NEON["pink"], danger="#FF5370",
+    secondary=NEON["violet"], neutral="#71809B",
+    dark={"background": NEON["bg"], "foreground": NEON["text"]},
+).register()
 SEED_RISKS = [
     ("Clasificador LLM", "Alucinación o extracción incorrecta", "transparencia", 3, 5, "Validar JSON, mostrar fuentes y exigir revisión humana"),
     ("Clasificador", "Sesgo ante correos con ortografía informal", "sesgo", 4, 4, "Evaluar muestras diversas y corregir vocabulario"),
@@ -177,34 +191,54 @@ from logismart.domain import evaluate, truth_rows, rule_classifier, extract_enti
 from logismart.repository import MongoStore as Store
 
 
-class App(tk.Tk):
+class App(ttkb.App):
     def __init__(self):
-        super().__init__()
+        super().__init__(title="LogiSmart · centro de control", theme="logismart-neon-dark")
         self.title("LogiSmart · centro de control")
-        self.geometry("1120x760")
-        self.minsize(900, 620)
+        self.geometry("1360x880")
+        self.minsize(1050, 700)
         self.store = Store()
         self.model = MODEL
         self.review_threshold = "alta"
         self.simulate_email = True
-        self._style()
+        self._configure_neon_styles()
         self._build()
         self.seed_demo()
 
-    def _style(self):
-        self.configure(bg="#f3f5f8")
-        st = ttk.Style(self); st.theme_use("clam")
-        st.configure("TFrame", background="#f3f5f8")
-        st.configure("TLabel", background="#f3f5f8", foreground="#172033", font=("Segoe UI",10))
-        st.configure("Title.TLabel", font=("Segoe UI",22,"bold"), foreground="#172033")
-        st.configure("TButton", font=("Segoe UI",10), padding=8)
-        st.configure("Treeview", rowheight=28, font=("Segoe UI",9))
-        st.configure("Treeview.Heading", font=("Segoe UI",9,"bold"))
+    def _configure_neon_styles(self):
+        self.configure(bg=NEON["bg"])
+        st = ttk.Style()
+        st.configure("TFrame", background=NEON["bg"])
+        st.configure("TLabel", background=NEON["bg"], foreground=NEON["text"], font=("Segoe UI",10))
+        st.configure("Title.TLabel", font=("Segoe UI Semibold",22,"bold"), foreground=NEON["cyan"])
+        st.configure("Status.TLabel", font=("Segoe UI",10,"bold"), foreground=NEON["lime"])
+        st.configure("Metric.TLabel", background=NEON["surface"], foreground=NEON["lime"], font=("Segoe UI Semibold",25,"bold"))
+        st.configure("TButton", font=("Segoe UI Semibold",10), padding=(12,8), borderwidth=1, background=NEON["surface_2"], foreground=NEON["text"], bordercolor=NEON["border"])
+        st.map("TButton", background=[("pressed",NEON["pink"]),("active",NEON["selected"])], foreground=[("pressed",NEON["bg"]),("active",NEON["cyan"])])
+        st.configure("TNotebook", background=NEON["bg"], borderwidth=0, tabmargins=(0,8,0,0))
+        st.configure("TNotebook.Tab", background=NEON["surface_2"], foreground=NEON["muted"], padding=(15,10), font=("Segoe UI Semibold",9))
+        st.map("TNotebook.Tab", background=[("selected",NEON["cyan"]),("active",NEON["selected"])], foreground=[("selected",NEON["bg"]),("active",NEON["text"])])
+        st.configure("TLabelframe", background=NEON["surface"], bordercolor=NEON["border"], relief="solid")
+        st.configure("TLabelframe.Label", background=NEON["bg"], foreground=NEON["pink"], font=("Segoe UI Semibold",10))
+        st.configure("Treeview", rowheight=31, font=("Segoe UI",9), background=NEON["surface"], fieldbackground=NEON["surface"], foreground=NEON["text"], bordercolor=NEON["border"], lightcolor=NEON["border"], darkcolor=NEON["border"])
+        st.configure("Treeview.Heading", font=("Segoe UI Semibold",9), background=NEON["surface_2"], foreground=NEON["cyan"], relief="flat", padding=(8,8))
+        st.map("Treeview", background=[("selected",NEON["selected"])], foreground=[("selected",NEON["cyan"])])
+        st.configure("TEntry", fieldbackground=NEON["input"], foreground=NEON["text"], insertcolor=NEON["cyan"], bordercolor=NEON["border"], padding=7)
+        st.configure("TCombobox", fieldbackground=NEON["input"], foreground=NEON["text"], background=NEON["surface_2"], arrowcolor=NEON["cyan"], bordercolor=NEON["border"], padding=6)
+        st.map("TCombobox", fieldbackground=[("readonly",NEON["input"])], foreground=[("readonly",NEON["text"])], selectbackground=[("readonly",NEON["selected"])], selectforeground=[("readonly",NEON["cyan"])])
+        st.configure("TCheckbutton", background=NEON["bg"], foreground=NEON["text"], font=("Segoe UI",10))
+        st.map("TCheckbutton", foreground=[("active",NEON["cyan"])], background=[("active",NEON["bg"])])
+        st.configure("TSeparator", background=NEON["border"])
+
+    def text_widget(self, parent, **options):
+        base={"bg":NEON["input"],"fg":NEON["text"],"insertbackground":NEON["cyan"],"selectbackground":NEON["selected"],"selectforeground":NEON["text"],"relief":"flat","bd":0,"highlightthickness":1,"highlightbackground":NEON["border"],"highlightcolor":NEON["cyan"],"font":("Cascadia Mono",10)}
+        base.update(options)
+        return tk.Text(parent,**base)
 
     def _build(self):
         header=ttk.Frame(self,padding=(22,18)); header.pack(fill="x")
         ttk.Label(header,text="LOGISMART",style="Title.TLabel").pack(side="left")
-        self.status=ttk.Label(header,text=self.db_status()); self.status.pack(side="right")
+        self.status=ttk.Label(header,text=self.db_status(),style="Status.TLabel"); self.status.pack(side="right")
         self.nb=ttk.Notebook(self); self.nb.pack(fill="both",expand=True,padx=18,pady=(0,18))
         self.dashboard=ttk.Frame(self.nb,padding=18); self.nb.add(self.dashboard,text="Resumen")
         self.access=ttk.Frame(self.nb,padding=18); self.nb.add(self.access,text="Acceso")
@@ -236,7 +270,7 @@ class App(tk.Tk):
 
     def card(self, parent, title, value):
         box=ttk.LabelFrame(parent,text=title,padding=18); box.pack(side="left",fill="x",expand=True,padx=6,pady=12)
-        label=ttk.Label(box,text=str(value),font=("Segoe UI",24,"bold")); label.pack(); return label
+        label=ttk.Label(box,text=str(value),style="Metric.TLabel"); label.pack(); return label
 
     def build_dashboard(self):
         ttk.Label(self.dashboard,text="Resumen operativo",style="Title.TLabel").pack(anchor="w")
@@ -322,9 +356,9 @@ class App(tk.Tk):
             var=tk.BooleanVar(value=(key in ("P","S","cert"))); self.flags[key]=var
             ttk.Checkbutton(frm,text=label,variable=var,command=self.live_eval).grid(row=i//2,column=i%2,sticky="w",padx=12,pady=8)
         ttk.Label(self.access,text="Placa (opcional)").pack(anchor="w",pady=(14,3)); self.plate=tk.StringVar(); ttk.Entry(self.access,textvariable=self.plate,width=30).pack(anchor="w")
-        ttk.Button(self.access,text="Guardar evaluación",command=self.save_access).pack(anchor="w",pady=12)
+        ttk.Button(self.access,text="Guardar evaluación",command=self.save_access,bootstyle="success").pack(anchor="w",pady=12)
         self.access_result=ttk.Label(self.access,text="Activa las premisas para ver el resultado.",font=("Segoe UI",12,"bold")); self.access_result.pack(anchor="w",pady=8)
-        self.access_expl=tk.Text(self.access,height=7,width=100,wrap="word"); self.access_expl.pack(fill="x",pady=8)
+        self.access_expl=self.text_widget(self.access,height=7,width=100,wrap="word"); self.access_expl.pack(fill="x",pady=8)
         self.live_eval()
 
     def live_eval(self):
@@ -345,9 +379,9 @@ class App(tk.Tk):
         self.sender=tk.StringVar(value="operador@logismart.local"); self.subject=tk.StringVar()
         ttk.Label(form,text="Remitente").grid(row=0,column=0,sticky="w"); ttk.Entry(form,textvariable=self.sender,width=34).grid(row=1,column=0,padx=(0,10))
         ttk.Label(form,text="Asunto").grid(row=0,column=1,sticky="w"); ttk.Entry(form,textvariable=self.subject,width=60).grid(row=1,column=1,sticky="ew")
-        ttk.Label(self.incidents,text="Correo / descripción").pack(anchor="w"); self.body=tk.Text(self.incidents,height=6,wrap="word"); self.body.pack(fill="x",pady=4)
+        ttk.Label(self.incidents,text="Correo / descripción").pack(anchor="w"); self.body=self.text_widget(self.incidents,height=6,wrap="word"); self.body.pack(fill="x",pady=4)
         bar=ttk.Frame(self.incidents); bar.pack(fill="x",pady=6)
-        ttk.Button(bar,text="Clasificar + guardar",command=self.classify_save).pack(side="left")
+        ttk.Button(bar,text="Clasificar + guardar",command=self.classify_save,bootstyle="primary").pack(side="left")
         self.inc_status=tk.StringVar(value="nuevo"); ttk.Combobox(bar,textvariable=self.inc_status,values=["nuevo","en_atencion","cerrado"],state="readonly",width=15).pack(side="left",padx=8)
         ttk.Button(bar,text="Actualizar estado",command=self.update_incident).pack(side="left")
         self.inc_category=tk.StringVar();self.inc_priority=tk.StringVar()
@@ -361,7 +395,7 @@ class App(tk.Tk):
         self.inc_tree=ttk.Treeview(self.incidents,columns=("categoria","prioridad","estado","fecha"),show="headings",height=9)
         for col,w in [("categoria",220),("prioridad",100),("estado",130),("fecha",220)]: self.inc_tree.heading(col,text=col.title()); self.inc_tree.column(col,width=w)
         self.inc_tree.pack(fill="both",expand=True,pady=8);self.inc_tree.bind("<<TreeviewSelect>>",self.select_incident)
-        self.inc_detail=tk.Text(self.incidents,height=5,wrap="word",state="disabled");self.inc_detail.pack(fill="x",pady=5)
+        self.inc_detail=self.text_widget(self.incidents,height=5,wrap="word",state="disabled");self.inc_detail.pack(fill="x",pady=5)
         self.refresh_incidents()
 
     def start_dataset_evaluation(self):
@@ -525,7 +559,7 @@ class App(tk.Tk):
 
     def build_assistant(self):
         ttk.Label(self.assistant,text="Asistente explicativo · responde usando registros recuperados",style="Title.TLabel").pack(anchor="w")
-        self.chat=tk.Text(self.assistant,state="disabled",wrap="word"); self.chat.pack(fill="both",expand=True,pady=10)
+        self.chat=self.text_widget(self.assistant,state="disabled",wrap="word"); self.chat.pack(fill="both",expand=True,pady=10)
         row=ttk.Frame(self.assistant); row.pack(fill="x"); self.question=tk.StringVar(); ttk.Entry(row,textvariable=self.question).pack(side="left",fill="x",expand=True); ttk.Button(row,text="Preguntar",command=self.ask).pack(side="left",padx=6)
 
     def ask(self):
@@ -572,7 +606,7 @@ class App(tk.Tk):
             ttk.Label(form,text=l).grid(row=0,column=i,sticky="w")
             if i==2:ttk.Combobox(form,textvariable=v,values=["sesgo","privacidad","transparencia","seguridad","responsabilidad","otro"],width=18).grid(row=1,column=i,padx=2)
             else:ttk.Entry(form,textvariable=v,width=20).grid(row=1,column=i,padx=2)
-        ttk.Button(form,text="Agregar riesgo",command=self.add_risk).grid(row=1,column=6,padx=6)
+        ttk.Button(form,text="Agregar riesgo",command=self.add_risk,bootstyle="primary").grid(row=1,column=6,padx=6)
         self.risk_tree=ttk.Treeview(self.risks,columns=("modulo","categoria","inicial","residual","mitigacion"),show="headings",height=12)
         for c,w in [("modulo",150),("categoria",125),("inicial",90),("residual",90),("mitigacion",480)]:self.risk_tree.heading(c,text=c.title());self.risk_tree.column(c,width=w)
         self.risk_tree.pack(fill="both",expand=True);self.risk_tree.bind("<<TreeviewSelect>>",self.select_risk)
@@ -580,7 +614,7 @@ class App(tk.Tk):
         ttk.Button(actions,text="Guardar edición",command=self.edit_risk).pack(side="left")
         ttk.Button(actions,text="Limpiar formulario",command=self.clear_risk).pack(side="left",padx=5)
         ttk.Button(actions,text="Eliminar seleccionado",command=self.delete_risk).pack(side="right",pady=6)
-        self.risk_chart=tk.Canvas(self.risks,height=150,bg="white",highlightthickness=1,highlightbackground="#d8dee9");self.risk_chart.pack(fill="x",pady=6)
+        self.risk_chart=tk.Canvas(self.risks,height=150,bg=NEON["surface"],highlightthickness=1,highlightbackground=NEON["border"]);self.risk_chart.pack(fill="x",pady=6)
         self.refresh_risks()
 
     def add_risk(self):
@@ -609,10 +643,10 @@ class App(tk.Tk):
         groups={"Bajo":0,"Medio":0,"Alto":0,"Crítico":0}
         for r in risks:
             score=int(r.get("puntaje_residual",0));groups["Crítico" if score>=17 else "Alto" if score>=10 else "Medio" if score>=5 else "Bajo"]+=1
-        colors={"Bajo":"#4caf50","Medio":"#f0b429","Alto":"#ef8354","Crítico":"#d64550"};x=30
+        colors={"Bajo":NEON["lime"],"Medio":"#FFD166","Alto":NEON["pink"],"Crítico":"#FF5370"};x=30
         for label,count in groups.items():
-            width=max(24,count*45);c.create_rectangle(x,70,x+width,105,fill=colors[label],outline="");c.create_text(x+width/2,55,text=f"{label}: {count}");x+=width+30
-        c.create_text(15,18,anchor="w",text="Riesgo residual por nivel (probabilidad residual × impacto residual)",fill="#172033")
+            width=max(24,count*45);c.create_rectangle(x,70,x+width,105,fill=colors[label],outline="");c.create_text(x+width/2,55,text=f"{label}: {count}",fill=NEON["text"],font=("Segoe UI",9,"bold"));x+=width+30
+        c.create_text(15,18,anchor="w",text="RIESGO RESIDUAL · PROBABILIDAD × IMPACTO",fill=NEON["cyan"],font=("Segoe UI Semibold",9,"bold"))
 
     def select_risk(self,event=None):
         selected=self.risk_tree.selection()
@@ -690,7 +724,7 @@ class App(tk.Tk):
         ttk.Button(bar,text="Consultar / refrescar",command=self.refresh_admin).pack(side="left",padx=5)
         self.admin_tree=ttk.Treeview(self.admin,columns=("id","vista"),show="headings",height=9);self.admin_tree.heading("id",text="ObjectId");self.admin_tree.heading("vista",text="Vista previa del documento");self.admin_tree.column("id",width=230);self.admin_tree.column("vista",width=760);self.admin_tree.pack(fill="x",pady=5);self.admin_tree.bind("<<TreeviewSelect>>",self.select_admin_doc)
         ttk.Label(self.admin,text="Documento JSON (para alta o edición)").pack(anchor="w")
-        self.admin_json=tk.Text(self.admin,height=10,wrap="none");self.admin_json.pack(fill="both",expand=True)
+        self.admin_json=self.text_widget(self.admin,height=10,wrap="none");self.admin_json.pack(fill="both",expand=True)
         actions=ttk.Frame(self.admin);actions.pack(fill="x",pady=5)
         ttk.Button(actions,text="Nuevo / limpiar",command=lambda:self.admin_json.delete("1.0","end")).pack(side="left")
         ttk.Button(actions,text="Insertar / guardar edición",command=self.save_admin_doc).pack(side="left",padx=5)
